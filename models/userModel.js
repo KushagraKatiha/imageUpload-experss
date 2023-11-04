@@ -21,6 +21,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Password is required"],
         select: false,
+    },
+    avtar:{
+        public_id: {
+            type: String,
+        },
+        secure_url: {
+            type: String,
+        }
     }
     
 }, {timestamps: true})
