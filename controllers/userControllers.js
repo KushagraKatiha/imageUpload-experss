@@ -1,36 +1,14 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const emailValidator = require("email-validator");
-const multer = require('multer')
-const path = require('path')
-
-const upload = multer({
-    dest: 'uploads/',
-    limits: {fileSize: 50 * 1024 * 1024},
-    storage: multer.diskStorage({
-        destination: 'uploads/',
-        filename: (req, file, cb) => {
-            cb(null, file.originalname)
-        },
-    }),
-    
-    fileFilter: (req, file, cb) => {
-        let ext = path.extname(file.originalname);
-
-        if( ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png' && ext !== '.mp4' && ext !== '.webp'){
-            cb(new Error('File type is not supported'), false);
-            return;
-        }
-        
-        cb(null, true);
-    }
-})
+const cloudinary = require('cloudinary')
+const upload = require('../utils/multer.js')
 
 const home = (req, res) => {
     res.send("<h1>Hello from the controller!</h1>");
 }
 
-const setDetails = async (req, res) => {
+const setDetails = async (req, res, next) => {
     try{
         const {name, username, email, password} = req.body
 
@@ -46,11 +24,40 @@ const setDetails = async (req, res) => {
             username,
             email,
             password,
-            avtar: {
+            avatar: {
                 public_id: email,
-                secure_url: ""
+                secure_url: "123"
             }
         })
+
+        // TODO: upload user picture
+
+        
+
+        console.log(`File details > ${JSON.stringify(req.file)} `);
+
+        if(req.file){  
+                const result = await cloudinary.v2.uploader.upload(req.file.path, {
+                    folder: 'lms',
+                    width: 250,
+                    height: 250,
+                    gravity: 'faces',
+                    crop: 'fill'
+                })
+
+                if(result){
+                    user.avatar.public_id = result.public_id;
+                    user.avatar.secure_url = result.secure_url
+                    
+                    // remove file from local storage
+    
+                    // fs.rm(`uploads/${req.file.filename}`)
+                }
+            }else{
+                throw new Error (`Image Upload Fail`)
+            }
+            
+        
 
         await user.save()
 
@@ -61,11 +68,13 @@ const setDetails = async (req, res) => {
 
     }catch(err){
         res.status(400).json({
-            success: false, 
+            success: "error samajh nhi aa rha ", 
             message: err.message
         })
     }
 }
+
+
 const getDetails = async (req, res) => {
     
     try {
@@ -111,5 +120,6 @@ const getDetails = async (req, res) => {
 module.exports = {
     setDetails,
     getDetails,
-    home
+    home,
+    upload
 }
