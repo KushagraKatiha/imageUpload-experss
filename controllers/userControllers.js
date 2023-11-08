@@ -65,6 +65,7 @@ const setDetails = async (req, res, next) => {
             success: true,
             message: "User created successfully"
         })
+        next()
 
     }catch(err){
         res.status(400).json({
