@@ -1,8 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const emailValidator = require("email-validator");
-const cloudinary = require('cloudinary')
-const upload = require('../utils/multer.js')
+const uploadToCloudinary = require("../utils/cloudinary");
 
 const home = (req, res) => {
     res.send("<h1>Hello from the controller!</h1>");
@@ -30,28 +29,15 @@ const setDetails = async (req, res, next) => {
             }
         })
 
-        // TODO: upload user picture
-
-        
-
-        console.log(`File details > ${JSON.stringify(req.file)} `);
+        console.log(`File details > ${JSON.stringify(req.file.path)}`); // file path in local storage
 
         if(req.file){  
-                const result = await cloudinary.v2.uploader.upload(req.file.path, {
-                    folder: 'lms',
-                    width: 250,
-                    height: 250,
-                    gravity: 'faces',
-                    crop: 'fill'
-                })
+                const result = await uploadToCloudinary(req.file.path)
 
                 if(result){
                     user.avatar.public_id = result.public_id;
                     user.avatar.secure_url = result.secure_url
-                    
-                    // remove file from local storage
-    
-                    // fs.rm(`uploads/${req.file.filename}`)
+                   
                 }
             }else{
                 throw new Error (`Image Upload Fail`)
@@ -121,6 +107,5 @@ const getDetails = async (req, res) => {
 module.exports = {
     setDetails,
     getDetails,
-    home,
-    upload
+    home
 }

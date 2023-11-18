@@ -11,15 +11,14 @@ const upload = multer({
         },
     }),
     
-    fileFilter: (req, file, cb) => {
-        let ext = path.extname(file.originalname);
+    fileFilter(req, file, cb){
+        const ext = path.extname(file.originalname)
 
-        if( ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png' && ext !== '.mp4' && ext !== '.webp'){
-            cb(new Error('File type is not supported'), false);
-            return;
+        if(ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg'){
+            cb(new Error('File type is not supported'), false)
+            return
         }
-        
-        cb(null, true);
+        cb(null, true)
     }
 })
 
